@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import {Router} from '@angular/router';
+
+
 
 @Component({
   selector: 'app-signup',
@@ -22,7 +25,7 @@ export class SignupComponent {
  errorMessage ='';
  successMessage = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   onSubmit() {
     this.http.post('http://localhost:8080/api/users/signup', this.user, { responseType: 'text' }).subscribe({
@@ -31,6 +34,9 @@ export class SignupComponent {
         this.errorMessage ='';
         this.user = { username: '', password: '' }; // Felder leeren
         this.clearMessagesAfterDelay();
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 1000);
   
       },
       error: (error) => {

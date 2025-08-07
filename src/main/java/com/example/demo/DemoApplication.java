@@ -18,5 +18,3 @@ public class DemoApplication {
 
 }
 
-
-https://github.com/JensGruen1/BankAccountWithAngular.git

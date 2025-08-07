@@ -1,0 +1,52 @@
+<div class="container mt-5">
+  <div class="text-center">
+    <h1 class="mb-4">Login</h1>
+
+    <!-- Fehlermeldung bei bereits vorhandenem User -->
+    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="alert alert-success" role="alert">
+      {{ successMessage }}
+    </div>
+
+
+    <form (ngSubmit)="onSubmit()" #signupForm="ngForm">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="name"
+          class="form-control"
+          [(ngModel)]="user.username"
+          required
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          class="form-control"
+          [(ngModel)]="user.password"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">
+        Login
+      </button>
+    </form>
+
+    <div class="mt-3">
+      <p>
+        Do not have an account yet? Please sign up.
+        <a routerLink="/signup">Sign up here</a>
+      </p>
+    </div>
+  </div>
+</div>
