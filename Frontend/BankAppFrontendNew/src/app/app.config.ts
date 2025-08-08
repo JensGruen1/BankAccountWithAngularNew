@@ -4,6 +4,7 @@ import { provideRouter, Routes } from '@angular/router';
 import { SignupComponent } from './features/signup/signup.component';
 import {LoginComponent} from './features/login/login.component';
 import { HomeComponent } from './features/home/home.component';
+import { AuthGuard } from './auth.guard'; 
 
 // import { routes } from './app.routes';
 
@@ -15,7 +16,7 @@ const routes: Routes = [
   {path: 'signup', component: SignupComponent},
   //{path: '', redirectTo: 'signup', pathMatch: 'full' }, // Optional, für Root
   {path: 'login', component: LoginComponent},
-  {path: 'home', component: HomeComponent},
+  {path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   {path: '**', redirectTo: 'signup'},
 ];
 
