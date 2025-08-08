@@ -30,6 +30,7 @@ constructor(private http: HttpClient, private router: Router) {}
     this.http.post('http://localhost:8080/api/users/login', this.user, { responseType: 'text' }).subscribe({
       next: (response) => {
         this.successMessage = response;
+        localStorage.setItem('user', this.user.username);
         setTimeout(() => {
           this.router.navigate(['/home']);
         }, 1000);
