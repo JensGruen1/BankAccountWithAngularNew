@@ -36,9 +36,16 @@ constructor(private http: HttpClient, private router: Router) {}
   
       },
       error: (error) => {
-          this.errorMessage = error.status === 401
-            ? 'Ungültige Anmeldedaten'
-            : 'Ein Fehler ist aufgetreten';
+        if (error.status === 0) {
+          // Status 0 = kein Kontakt zum Backend
+          this.errorMessage = '❌ Keine Verbindung zum Server';
+        } else if (error.status === 401) {
+          // Status 401 = Login falsch
+          this.errorMessage = '❌ Ungültige Anmeldedaten';
+        } else {
+          // Alle anderen HTTP-Fehler
+          this.errorMessage = `❌ Fehler vom Server (${error.status}): ${error.statusText || 'Unbekannt'}`;
+        }
         this.clearMessagesAfterDelay();
       },
     });
@@ -49,8 +56,7 @@ constructor(private http: HttpClient, private router: Router) {}
     setTimeout(() => {
       this.errorMessage = '';
       this.successMessage = '';
-    }, 5000);
+    }, 10000);
   }
   
-
 }

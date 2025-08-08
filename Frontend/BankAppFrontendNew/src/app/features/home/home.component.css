@@ -1,0 +1,64 @@
+/* .item1 { grid-area: header; }
+.item2 { grid-area: menu; }
+.item3 { grid-area: main; }
+.item4 { grid-area: right; }
+.item5 { grid-area: footer; }
+
+.grid-container {
+    box-sizing: content-box;
+width: 550px;
+  display: grid;
+   margin: auto;
+
+  grid-template-areas:
+    'header header header header header header'
+    'menu menu menu menu menu right'
+    'footer footer footer footer footer footer1';
+
+  background-color: #D3D3D3;
+  padding: 10px;
+}
+
+
+.grid-container1 {
+    box-sizing: content-box;
+width: 550px;
+  display: grid;
+   margin: auto;
+
+  grid-template-areas:
+    'footer footer footer footer footer footer1';
+
+  background-color: #D3D3D3;
+  padding: 10px;
+}
+
+
+.item1 {
+  text-align: left;
+  padding: 15px 0;
+  font-size: 30px;
+}
+
+.item2 {
+  text-align: left;
+  padding:10px 0;
+  font-size: 20px;
+}
+
+.item5 {
+  text-align: left;
+  padding: 1px 0;
+  font-size: 17px;
+}
+
+.item6 {
+  text-align: right;
+  padding: 1px 20px;
+  font-size: 17px;
+}
+
+
+#accountDetails {
+display: none;
+} */
