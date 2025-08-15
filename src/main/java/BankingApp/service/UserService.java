@@ -3,8 +3,17 @@ package BankingApp.service;
 import BankingApp.entity.User;
 import BankingApp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
+
+@Service
 public class UserService {
 
     @Autowired
@@ -13,9 +22,25 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public User saveUser(User user) {
-        // Passwort hashen bevor gespeichert wird
+    public void saveUser(User user) {
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        userRepository.save(user);
     }
+
+
+    public User getLoggedInUser() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            return userRepository.findByUsername(auth.getName())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + auth.getName()));
+        } else {
+
+            throw new AccessDeniedException("No authenticated user found");
+        }
+    }
+
+
 }

@@ -1,0 +1,31 @@
+<nav class="navbar navbar-expand navbar-dark bg-dark mt-3">
+  <div class="container-fluid">
+    <div class="collapse navbar-collapse" id="servicesNavbar">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/account-generator">Open New Account</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/transactions/deposit">Deposit Money</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/transactions/withdraw">Withdraw Money</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/transactions/transfer">Transfer Money</a>
+        </li>
+
+        <!-- <li class="dropdown">
+          <form action="#" th:action="@{/home}" method ="get">
+          <div class="dropdown">
+            <select name ="accountNumber" class="form-select" aria-label="Default select example" onchange='if(this.value != 0) { this.form.submit(); }'>
+              <option selected>Select your Bank Account</option>
+              <option th:each="accountNumbers : ${accountNumbersList}"  th:text="${accountNumbers}">
+            </select>
+          </div>
+          </form>
+        </li> -->
+      </ul>
+    </div>
+  </div>
+</nav>
