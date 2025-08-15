@@ -5,10 +5,12 @@ import BankingApp.dto.LoginRequest;
 import BankingApp.entity.User;
 import BankingApp.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,7 +19,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,12 +38,15 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private final SessionRegistry sessionRegistry;
 
-    public UserController(UserRepository repository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public UserController(UserRepository repository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, SessionRegistry sessionRegistry) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.sessionRegistry = sessionRegistry;
     }
+
 
 
     @PostMapping("/signup")
@@ -58,7 +66,7 @@ public class UserController {
             repository.save(user);
             return ResponseEntity.status(HttpStatus.OK).body("User created");
         } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Feld darf nicht leer sein");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Input");
         }
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -89,8 +97,10 @@ public class UserController {
             logger.info("Login successful for user: {}", loginrequest.getUsername());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            request.getSession(true);
+            HttpSession session = request.getSession(true);
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                    SecurityContextHolder.getContext());
+            sessionRegistry.registerNewSession(session.getId(), authentication.getPrincipal());
             return ResponseEntity.ok("Login erfolgreich");
         } catch (BadCredentialsException ex) {
             logger.warn("Login failed for user: {} - Reason: {}", loginrequest.getUsername(), ex.getMessage());
