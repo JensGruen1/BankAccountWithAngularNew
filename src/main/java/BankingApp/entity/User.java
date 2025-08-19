@@ -1,12 +1,10 @@
 package BankingApp.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+
+import java.util.List;
 
 @Entity
 @Table(name ="users")
@@ -35,6 +33,16 @@ public class User {
 
     public long getId() {
         return id;
+    }
+
+    @OneToMany
+    @JoinColumn(name ="user_id")
+    private List<Account> accounts;
+    public List<Account> getAccounts() {
+        return accounts;
+    }
+    public void setAccounts(List<Account> accounts) {
+        this.accounts = accounts;
     }
 
 

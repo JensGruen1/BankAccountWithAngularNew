@@ -4,7 +4,6 @@ import BankingApp.entity.User;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name ="accounts")
 public class AccountRequest {
 
     @Id

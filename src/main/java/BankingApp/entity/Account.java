@@ -1,5 +1,6 @@
 package BankingApp.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -59,6 +60,7 @@ public class Account {
     }
 
     @ManyToOne
+    @JsonIgnore
     private User user;
 
 

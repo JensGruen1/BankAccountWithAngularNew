@@ -16,6 +16,7 @@ import {Router} from '@angular/router';
 
 export class AccountGeneratorComponent {
     account = {
+    accountId: '',
     accountType: '',
     balance: '',
   };
@@ -36,6 +37,7 @@ export class AccountGeneratorComponent {
          localStorage.setItem('accountData', JSON.stringify({
           accountType: this.account.accountType,
           balance: this.account.balance,
+          accountId: this.account.accountId,
         }));  
 
         setTimeout(() => {
