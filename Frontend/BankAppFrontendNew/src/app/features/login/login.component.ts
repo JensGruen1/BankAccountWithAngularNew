@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { HttpClient} from '@angular/common/http';
 import {Router} from '@angular/router';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 
 @Component({
   selector: 'app-login',
@@ -22,8 +25,24 @@ export class LoginComponent {
 
  errorMessage ='';
  successMessage = '';
+ logoutSuccess = false;
+ timeoutLogout = false;
 
-constructor(private http: HttpClient, private router: Router) {}
+  private route = inject(ActivatedRoute);
+
+
+constructor(private http: HttpClient, private router: Router) {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed())
+      .subscribe((params: ParamMap) => {      
+          if (params.has('logout')) {
+          this.logoutSuccess = true;
+          setTimeout(() => this.logoutSuccess = false, 3000);
+        } else {
+          this.logoutSuccess = false;
+        }
+      });
+}
 
 
   onSubmit() {

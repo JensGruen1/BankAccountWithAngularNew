@@ -180,7 +180,9 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutUrl("/api/users/logout")
+                        .invalidateHttpSession(true)
                         .logoutSuccessHandler((request, response, authentication) -> response.setStatus(200))
+                        .deleteCookies("JSESSIONID")
                 ).httpBasic(Customizer.withDefaults());
 
         return http.build();

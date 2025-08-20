@@ -3,6 +3,7 @@ package BankingApp.controller;
 
 import BankingApp.dto.AccountRequest;
 import BankingApp.dto.DepositRequest;
+import BankingApp.dto.WithdrawRequest;
 import BankingApp.entity.Account;
 import BankingApp.entity.User;
 import BankingApp.repository.UserRepository;
@@ -56,10 +57,19 @@ public class AccountController {
         @PostMapping("/deposit")
         public ResponseEntity<?> deposit(@RequestBody DepositRequest depositRequest) {
         Account account = accountService.getAccountByAccountNumber(depositRequest.getAccountNumber());
-        double balance = account.getBalance() + depositRequest.getAmount();
-        account.setBalance(balance);
-        accountService.updateAccount(account);
+           double balance = account.getBalance() + depositRequest.getAmount();
+           account.setBalance(balance);
+           accountService.updateAccount(account);
         return ResponseEntity.status(HttpStatus.OK).body("Deposit money successfully");
+        }
+
+        @PostMapping("/withdraw")
+        public ResponseEntity<?> withdraw(@RequestBody WithdrawRequest withdrawRequest) {
+           Account account = accountService.getAccountByAccountNumber(withdrawRequest.getAccountNumber());
+           double balance = account.getBalance() - withdrawRequest.getAmount();
+           account.setBalance(balance);
+           accountService.updateAccount(account);
+        return ResponseEntity.status(HttpStatus.OK).body("withdraw money successfully");
         }
 
 

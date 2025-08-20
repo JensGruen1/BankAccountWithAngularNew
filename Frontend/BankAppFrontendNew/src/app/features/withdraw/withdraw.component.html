@@ -1,0 +1,25 @@
+<div class="container mt-5">
+  <div class="text-center">
+    <h1 class="mb-4">Withdraw Money</h1>
+
+    <form #depositForm="ngForm" (ngSubmit)="onSubmit()">
+
+      <div class="mb-3">
+        <label for="accountNumber" class="form-label">Select your Bank account</label>
+        <select id="accountNumber" name="accountNumber" class="form-select" required [(ngModel)]="selectedAccount" (ngModelChange)="setAccountToLocalStorage($event)">
+          <!-- <select id="accountNumber" name="accountNumber" class="form-select" required (change)="onAccountSelect($event)"></select> -->
+           <option *ngFor="let account of accounts" [ngValue]="account">{{ account.accountNumber }}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="withdrawMoney" class="form-label">Select the amount of money you want to withdraw</label>
+        <input type="number" step ="0.01" min="0.01" id="withdrawMoney" name="withdrawMoney" class="form-control" required [(ngModel)]="withdrawAmount">
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Withdraw</button>
+
+
+    </form>
+  </div>
+</div>

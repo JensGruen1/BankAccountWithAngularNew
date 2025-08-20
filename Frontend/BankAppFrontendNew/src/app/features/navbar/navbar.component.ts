@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -22,27 +23,15 @@ user = {
 };
 
 
- constructor(private http: HttpClient, private router: Router) {}
+ constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
 
 
-  onLogout() {
-    console.log('Logout wird ausgeführt');
-  this.http.post('http://localhost:8080/api/users/logout', {}, { responseType: 'text' }).subscribe({
-  next: () => {
-    localStorage.removeItem('user');
-     setTimeout(() => {
-     console.log("Logout successful");
-      this.router.navigate(['/login']);
-   }, 1000);
-  
-  },
-  });
+ onLogout() {
+   console.log('Logout wird ausgeführt');
+   this.authService.logout();
+
  }
 
- testClick() {
-  console.log("Button wurde geklickt");
-  alert("Button wurde geklickt");
-}
 
 
 }
