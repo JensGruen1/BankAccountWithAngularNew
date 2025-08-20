@@ -42,11 +42,15 @@ export class SignupComponent {
       },
       error: (error) => {
         if (error.status === 409) {
-          this.errorMessage = 'User already exists';
+          this.errorMessage = '❌ User already exists';
         } else if (error.status === 400) {
-        this.errorMessage = 'Invalid input';
+        this.errorMessage = '❌ Invalid input';
+        } else if (error.status === 500) {
+          this.errorMessage = '❌ Internal server error'
+        } else if (error.status === 0) {
+          this.errorMessage = '❌ Keine Verbindung zum Server';
         } else {
-        this.errorMessage = 'Unexpected error: ' + error.message;
+          this.errorMessage = '❌ Unexpected error: ' + error.message;
         }
         this.successMessage = '';
         this.clearMessagesAfterDelay();

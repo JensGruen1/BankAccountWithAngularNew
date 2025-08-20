@@ -46,7 +46,7 @@ selectedAccount: Account | null = null;
 depositAmount: number = 0;
 
 
-constructor(private http:HttpClient, router:Router) {}
+constructor(private http:HttpClient, private router:Router) {}
 
 
 //maybe only the accountNumbers
@@ -100,7 +100,14 @@ onSubmit () {
 
 
   this.http.post('http://localhost:8080/api/users/deposit',deposit, { withCredentials: true, responseType: 'text'}).subscribe({
-        next: (response) => console.log('Deposit erfolgreich:', response),
+        next: (response) => {
+          console.log('Deposit erfolgreich:', response);
+          setTimeout(() => {
+          this.router.navigate(['/home']);
+        }, 1000);
+
+        },
+        
         error: (err) => console.error('Fehler beim Deposit:', err)
 
   });

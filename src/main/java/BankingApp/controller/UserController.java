@@ -4,6 +4,7 @@ package BankingApp.controller;
 import BankingApp.dto.LoginRequest;
 import BankingApp.entity.User;
 import BankingApp.repository.UserRepository;
+import BankingApp.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -39,12 +40,14 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final SessionRegistry sessionRegistry;
+    private final UserService userService;
 
-    public UserController(UserRepository repository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, SessionRegistry sessionRegistry) {
+    public UserController(UserRepository repository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, SessionRegistry sessionRegistry, UserService userService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.sessionRegistry = sessionRegistry;
+        this.userService = userService;
     }
 
 
@@ -105,6 +108,16 @@ public class UserController {
         } catch (BadCredentialsException ex) {
             logger.warn("Login failed for user: {} - Reason: {}", loginrequest.getUsername(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Ungültige Zugangsdaten");
+        }
+    }
+
+    @GetMapping("/isUserLoggedIn")
+    public ResponseEntity<?> isUserLoggedIn() {
+        User user = userService.getLoggedInUser();
+        if (user != null ) {
+            return ResponseEntity.status(HttpStatus.OK).body("User is logged in");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No logged in user");
         }
     }
 
