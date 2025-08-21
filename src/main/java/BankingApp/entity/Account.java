@@ -3,6 +3,8 @@ package BankingApp.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name ="accounts")
 public class Account {
@@ -63,16 +65,16 @@ public class Account {
     @JsonIgnore
     private User user;
 
-
+    @OneToMany(mappedBy = "account")
 //    @OneToMany
 //    @JoinColumn(name = "account_id")
-//    private List<Transfer> transfers;
-//
-//    public List<Transfer> getTransfers() {
-//        return transfers;
-//    }
-//
-//    public void setTransfers(List<Transfer> transfers) {
-//        this.transfers = transfers;
-//    }
+    private List<Transfer> transfers;
+
+    public List<Transfer> getTransfers() {
+        return transfers;
+    }
+
+    public void setTransfers(List<Transfer> transfers) {
+        this.transfers = transfers;
+    }
 }

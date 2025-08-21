@@ -8,6 +8,7 @@ import { AuthGuard } from './auth.guard';
 import { AccountGeneratorComponent } from './features/account-generator/account-generator.component';
 import { DepositComponent } from './features/deposit/deposit.component';
 import { WithdrawComponent } from './features/withdraw/withdraw.component';
+import { TransferComponent } from './features/transfer/transfer.component';
 
 // import { routes } from './app.routes';
 
@@ -23,6 +24,7 @@ const routes: Routes = [
   {path: 'account-generator', component: AccountGeneratorComponent, canActivate: [AuthGuard] },
   {path: 'deposit', component: DepositComponent, canActivate: [AuthGuard]},
   {path: 'withdraw', component: WithdrawComponent, canActivate: [AuthGuard]},
+  {path: 'transfer', component: TransferComponent, canActivate: [AuthGuard]},
   {path: '**', component: LoginComponent},
 ];
 

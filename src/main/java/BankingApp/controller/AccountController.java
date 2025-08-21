@@ -3,6 +3,7 @@ package BankingApp.controller;
 
 import BankingApp.dto.AccountRequest;
 import BankingApp.dto.DepositRequest;
+import BankingApp.dto.TransferRequest;
 import BankingApp.dto.WithdrawRequest;
 import BankingApp.entity.Account;
 import BankingApp.entity.User;
@@ -10,6 +11,8 @@ import BankingApp.repository.UserRepository;
 import BankingApp.service.AccountService;
 import BankingApp.service.UserService;
 import BankingApp.util.AccountNumberGenerator;
+import BankingApp.util.DepositTransactionException;
+import BankingApp.util.WithdrawalTransactionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -71,6 +74,33 @@ public class AccountController {
            accountService.updateAccount(account);
         return ResponseEntity.status(HttpStatus.OK).body("withdraw money successfully");
         }
+
+
+//    @GetMapping("/transactions/transfer")
+//    public String getTransferMoney (Model model, @RequestParam(required = false) String accountNumber) {
+//
+//        List<String> listAccountNumbers = userService.getListOfAccountNumbersFromAccountsFromLoggedInUser();
+//        Account account = accountService.getAccountByAccountNumber(accountNumber);
+//        model.addAttribute("users", listAccountNumbers);
+//
+//        return "transfer";}
+
+
+
+    @PostMapping("/transfer")
+    public ResponseEntity<?> transferMoney(@RequestBody TransferRequest transferRequest) {
+        try {
+            accountService.transferAccount(transferRequest.getAccountNumber(), transferRequest.getTransferredMoney(), transferRequest.getAccountNumberReceiver());
+
+        } catch (DepositTransactionException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deposit to account failed: " + e.getMessage());
+        } catch (WithdrawalTransactionException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Withdrawal from account failed: " + e.getMessage());
+        }
+        return ResponseEntity.status(HttpStatus.OK).body("Transfer successful");
+    }
+
+
 
 
 }
