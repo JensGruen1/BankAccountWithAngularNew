@@ -38,7 +38,6 @@ export class TransferComponent implements OnInit{
     constructor(private http:HttpClient, private router:Router, private authService: AuthService) {}
 
     ngOnInit():void {
-    //this.authService.checkUser();
     this.http.get<Account[]>('http://localhost:8080/api/users/showAccounts',{withCredentials: true}).subscribe({
       next: (data) => {
       this.accounts = data;
@@ -65,6 +64,7 @@ export class TransferComponent implements OnInit{
   transferredMoney: this.transferredMoney,
   accountNumberReceiver: this.accountNumberReceiver  
 };
+console.log(transfer);
 
     this.http.post('http://localhost:8080/api/users/transfer',transfer, {withCredentials: true, responseType: 'text'}).subscribe({
         next: (response) => {

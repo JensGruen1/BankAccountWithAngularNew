@@ -1,8 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
-import { NavbarComponent } from '../navbar/navbar.component';
-import { AccountNavbarComponent } from '../account-navbar/account-navbar.component';
+import { HttpClient } from '@angular/common/http';
+
+interface Account {
+  accountNumber: string;
+  accountType: string;
+  balance: number;
+  transfers?: any[];
+  [key: string]: any;
+}
+
+interface Transfer {
+  accountNumber: string;
+  transferredMoney: number;
+  accountNumberReceiver: string;
+  accountInfo: string;
+  [key: string]: any;
+}
+
+interface DateTransferMap {
+  [date: string]: Transfer[];
+}
 
 @Component({
   selector: 'app-home',
@@ -10,10 +29,8 @@ import { AccountNavbarComponent } from '../account-navbar/account-navbar.compone
   imports: [
     CommonModule,
     FormsModule,
-    NavbarComponent,
-    AccountNavbarComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent {}
+export class HomeComponent{}

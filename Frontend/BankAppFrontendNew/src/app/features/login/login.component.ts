@@ -49,7 +49,7 @@ constructor(private http: HttpClient, private router: Router) {
     this.http.post('http://localhost:8080/api/users/login', this.user, { withCredentials: true, responseType: 'text' }).subscribe({
       next: (response) => {
         this.successMessage = response;
-        localStorage.setItem('user', this.user.username);
+        localStorage.setItem('user', JSON.stringify(this.user.username));
         setTimeout(() => {
           this.router.navigate(['/home']);
         }, 1000);
