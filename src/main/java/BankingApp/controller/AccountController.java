@@ -6,6 +6,7 @@ import BankingApp.dto.DepositRequest;
 import BankingApp.dto.TransferRequest;
 import BankingApp.dto.WithdrawRequest;
 import BankingApp.entity.Account;
+import BankingApp.entity.Transfer;
 import BankingApp.entity.User;
 import BankingApp.repository.UserRepository;
 import BankingApp.service.AccountService;
@@ -19,7 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200") // allow Angular-Port
@@ -56,6 +57,53 @@ public class AccountController {
         return ResponseEntity.ok(accounts);
 
         }
+
+        @GetMapping("/listOfAccountNumbers")
+        public ResponseEntity<?> getListOfAccountNumbers() {
+            User user = userService.getLoggedInUser();
+            List<String> listOfAccountNumbers = new ArrayList<>();
+            List<Account> accounts = user.getAccounts();
+
+            if(accounts != null) {
+                for (Account account : accounts) {
+                    String accountNumber = account.getAccountNumber();
+                    listOfAccountNumbers.add(accountNumber);
+                }
+                return ResponseEntity.ok(listOfAccountNumbers);
+            } else {
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No accounts found");
+            }
+        }
+
+        @GetMapping("/getAccountDetails/{accountNumber}")
+        public ResponseEntity<?> getAccountDetails(@PathVariable String accountNumber) {
+
+             if (accountService.getAccountByAccountNumber(accountNumber) != null) {
+                 Account account = accountService.getAccountByAccountNumber(accountNumber);
+                 return ResponseEntity.ok(account);
+             } else  {
+                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Account does not exist");
+             }
+
+        }
+
+        @GetMapping("/getDateTransferMap/{accountNumber}")
+        public ResponseEntity<?> getDateTransferMap(@PathVariable String accountNumber) {
+            Map<String,List<Transfer>> transfersForEachDate = null;
+
+            if (accountService.getAccountByAccountNumber(accountNumber) != null) {
+                transfersForEachDate = accountService.createMapOfDatesAndListsOfTransfers(accountNumber);
+
+                return ResponseEntity.ok(transfersForEachDate);
+            } else  {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Account does not exist");
+            }
+        }
+
+
+
+
 
         @PostMapping("/deposit")
         public ResponseEntity<?> deposit(@RequestBody DepositRequest depositRequest) {

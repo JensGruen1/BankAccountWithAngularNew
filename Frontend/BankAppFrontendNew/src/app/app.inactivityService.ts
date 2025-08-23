@@ -9,7 +9,7 @@ export class InactivityService {
   private router = inject(Router);
   private authService = inject(AuthService);
 
-  private inactivityTime = 60 * 1000; // 1 Minute
+  private inactivityTime = 180 * 1000; // 1 Minute
 
   private protectedRoute = true; // Flag, ob Timeout aktiv ist
   private resetTimer$ = new Subject<void>();

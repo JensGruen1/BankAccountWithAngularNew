@@ -77,6 +77,7 @@ public void updateAccount (Account account) { accountRepository.save(account);}
 
                 Transfer transfer = new Transfer(transferAccountNumber, "+" + depositMoney,
                         transferDateNew, account);
+                transfer.setAccountInfo(transferAccount.getUser().getUsername());
 
                 transferDateRepository.save(transferDateNew);
                 transferRepository.save(transfer);

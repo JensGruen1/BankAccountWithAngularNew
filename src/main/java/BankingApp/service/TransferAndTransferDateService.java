@@ -67,11 +67,12 @@ public class TransferAndTransferDateService {
         TransferDate transferDateNew = addNewTransferDateIfNotExist();
 
         Transfer transfer = new Transfer(transferAccountNumber,transferMoney,transferDateNew, account);
-        if (accountNumber.equals(transferAccountNumber)) {
-            transfer.setAccountInfo(accountInfo);
-        } else {
-            transfer.setAccountInfo(transferAccount.getUser().getUsername());
-        }
+        transfer.setAccountInfo(transferAccount.getUser().getUsername());
+//        if (accountNumber.equals(transferAccountNumber)) {
+//            transfer.setAccountInfo(accountInfo);
+//        } else {
+//            transfer.setAccountInfo(transferAccount.getUser().getUsername());
+//        }
 
         updateTransferListToDate(transfer,transferDateNew);
         transferDateRepository.save(transferDateNew);
