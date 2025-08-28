@@ -57,24 +57,10 @@ public class UserController {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body("Invalid input");
         }
+        //Case of too many requests is still to cover!
+        userService.registerUser(user);
+        return ResponseEntity.ok("User signed up successfully");
 
-        if (repository.findByUsername(user.getUsername()).isPresent()) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT) // HTTP 409
-                    .body("User already exists");
-        }
-
-        try {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            repository.save(user);
-            return ResponseEntity.status(HttpStatus.OK).body("User created");
-        } catch (ValidationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Input");
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error: " + e.getMessage());
-        }
     }
 
 /*    @PostMapping("/login")

@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class AccountNumberGenerator {
 
-    public static final int ACCOUNT_NUMBER_LENGTH = 12;
+    public static final int ACCOUNT_NUMBER_LENGTH = 16;
 
     public static String generateAccountNumber() {
         Random random = new Random();
