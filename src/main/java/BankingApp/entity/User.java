@@ -3,6 +3,7 @@ package BankingApp.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -16,6 +17,8 @@ public class User {
     @NotBlank(message = "Username darf nicht leer sein")
     private String username;
     @NotBlank(message = "Passwort darf nicht leer sein")
+    @Size(min = 5)
+    @Size(max = 25)
     private String password;
 
     public String getPassword() {
