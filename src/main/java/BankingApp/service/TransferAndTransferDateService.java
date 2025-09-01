@@ -15,6 +15,8 @@ import BankingApp.repository.TransferRepository;
 import org.springframework.stereotype.Service;
 
 
+//Service can be removed completely if changes work!!!
+
 @Service
 public class TransferAndTransferDateService {
 
@@ -30,27 +32,31 @@ public class TransferAndTransferDateService {
 
     private List<TransferDate> getAllTransferDates () {return transferDateRepository.findAll();}
 
-    public TransferDate addNewTransferDateIfNotExist () {
-        List<TransferDate> listOfTransferDates = getAllTransferDates();
-        TransferDate transferDateNew =null;
-        String transferDate = transferDate();
 
-        if(listOfTransferDates.size() !=0) {
-            for (int i = 0; i < listOfTransferDates.size(); i++) {
-                if (Objects.equals(listOfTransferDates.get(i).getTransferDate(), transferDate)) {
-                    transferDateNew = listOfTransferDates.get(i);
-                    break;
-                } else if (i == listOfTransferDates.size() - 1) {
-                    transferDateNew = new TransferDate(transferDate);
-                }
-            }
-        } else {
-            transferDateNew = new TransferDate(transferDate);
-        }
+    //remove if changes are correct ( this method is not necessary because the new transferDate is always today
+    // (a transfer cannot be dated in the past)!
 
-        return transferDateNew;
-    }
-
+//    public TransferDate addNewTransferDateIfNotExist () {
+//        List<TransferDate> listOfTransferDates = getAllTransferDates();
+//        TransferDate transferDateNew =null;
+//        String transferDate = transferDate();
+//
+//        if(!listOfTransferDates.isEmpty()) {
+//            for (int i = 0; i < listOfTransferDates.size(); i++) {
+//                if (Objects.equals(listOfTransferDates.get(i).getTransferDate(), transferDate)) {
+//                    transferDateNew = listOfTransferDates.get(i);
+//                    break;
+//                } else if (i == listOfTransferDates.size() - 1) {
+//                    transferDateNew = new TransferDate(transferDate);
+//                }
+//            }
+//        } else {
+//            transferDateNew = new TransferDate(transferDate);
+//        }
+//
+//        return transferDateNew;
+//    }
+//
     private void updateTransferListToDate (Transfer transfer, TransferDate transferDateNew) {
         List<Transfer> newTransferList = new ArrayList<>();
         if (transferDateNew.getTransferListToDate() != null) {
@@ -61,12 +67,35 @@ public class TransferAndTransferDateService {
 
     }
 
-    public Transfer createAndSaveNewTransfer (String accountNumber, String transferAccountNumber, String transferMoney,
+    //to delete if change(transferDate without addNewTransferDateIfNotExist) method is working
+
+//    public Transfer createAndSaveNewTransfer (String accountNumber, String transferAccountNumber, String transferMoney,
+//                                              Account account, Account transferAccount, String accountInfo ) {
+//
+//        TransferDate transferDateNew = addNewTransferDateIfNotExist();
+//
+//        Transfer transfer = new Transfer(transferAccountNumber,transferMoney,transferDateNew, account);
+//        transfer.setAccountInfo(transferAccount.getUser().getUsername());
+////        if (accountNumber.equals(transferAccountNumber)) {
+////            transfer.setAccountInfo(accountInfo);
+////        } else {
+////            transfer.setAccountInfo(transferAccount.getUser().getUsername());
+////        }
+//
+//        updateTransferListToDate(transfer,transferDateNew);
+//        transferDateRepository.save(transferDateNew);
+//        transferRepository.save(transfer);
+//
+//        return transfer;
+//    }
+
+    public Transfer createAndSaveNewTransfer (String accountNumber, String transferredAccountNumber, String transferredMoney,
                                               Account account, Account transferAccount, String accountInfo ) {
 
-        TransferDate transferDateNew = addNewTransferDateIfNotExist();
 
-        Transfer transfer = new Transfer(transferAccountNumber,transferMoney,transferDateNew, account);
+        TransferDate transferDateNew = new TransferDate(transferDate());
+
+        Transfer transfer = new Transfer(transferredAccountNumber,transferredMoney,transferDateNew, account);
         transfer.setAccountInfo(transferAccount.getUser().getUsername());
 //        if (accountNumber.equals(transferAccountNumber)) {
 //            transfer.setAccountInfo(accountInfo);
@@ -80,6 +109,7 @@ public class TransferAndTransferDateService {
 
         return transfer;
     }
+
 
 
     private String transferDate () {

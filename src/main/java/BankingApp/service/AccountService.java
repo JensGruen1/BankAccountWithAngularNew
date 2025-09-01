@@ -9,6 +9,7 @@ import BankingApp.repository.AccountRepository;
 import BankingApp.repository.TransferDateRepository;
 import BankingApp.repository.TransferRepository;
 import BankingApp.util.DepositTransactionException;
+import BankingApp.util.SessionProvider;
 import BankingApp.util.WithdrawalTransactionException;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.Session;
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -27,16 +30,16 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final EntityManagerFactory entityManagerFactory;
-    private final TransferAndTransferDateService transferAndTransferDateService;
     private final TransferRepository transferRepository;
     private final TransferDateRepository transferDateRepository;
+    private final SessionProvider sessionProvider;
 
-    public AccountService(AccountRepository accountRepository, EntityManagerFactory entityManagerFactory, TransferAndTransferDateService transferAndTransferDateService, TransferRepository transferRepository, TransferDateRepository transferDateRepository) {
+    public AccountService(AccountRepository accountRepository, EntityManagerFactory entityManagerFactory, TransferRepository transferRepository, TransferDateRepository transferDateRepository, SessionProvider sessionProvider) {
         this.accountRepository = accountRepository;
         this.entityManagerFactory = entityManagerFactory;
-        this.transferAndTransferDateService = transferAndTransferDateService;
         this.transferRepository = transferRepository;
         this.transferDateRepository = transferDateRepository;
+        this.sessionProvider = sessionProvider;
     }
 
 
@@ -44,9 +47,7 @@ public class AccountService {
 accountRepository.save(account);
 }
 
-public List<Account> getAllAccountsFromUser (User user) {
-        return user.getAccounts();
-}
+//public List<Account> getAllAccountsFromUser (User user) {return user.getAccounts();}
 
 public Account getAccountByAccountNumber (String accountNumber) {
         return accountRepository.findAccountByAccountNumber(accountNumber);
@@ -56,13 +57,15 @@ public void updateAccount (Account account) { accountRepository.save(account);}
 
 
 
-    public void depositAccount (String accountNumber, double depositMoney, String transferAccountNumber) throws DepositTransactionException {
+    private void depositAccount (String accountNumber, double depositMoney, String transferAccountNumber) throws DepositTransactionException {
+        Session session = sessionProvider.getSession();
+        Transaction tx = session.beginTransaction();
+
         if (accountRepository.findAccountByAccountNumber(accountNumber) != null) {
             Account account = accountRepository.findAccountByAccountNumber(accountNumber);
             Account transferAccount = accountRepository.findAccountByAccountNumber(transferAccountNumber);
 
-            Session session = getSession();
-            Transaction tx = session.beginTransaction();
+
 
             try {
                 account.setBalance(account.getBalance() + depositMoney);
@@ -73,7 +76,9 @@ public void updateAccount (Account account) { accountRepository.save(account);}
             //updateTransferListForAccount(account, transfer);
                // accountRepository.save(account);
 
-                TransferDate transferDateNew = transferAndTransferDateService.addNewTransferDateIfNotExist();
+                TransferDate transferDateNew = new TransferDate(transferDate());
+                       // transferAndTransferDateService.
+                       // addNewTransferDateIfNotExist();  // remove if change is correct!
 
                 Transfer transfer = new Transfer(transferAccountNumber, "+" + depositMoney,
                         transferDateNew, account);
@@ -92,16 +97,27 @@ public void updateAccount (Account account) { accountRepository.save(account);}
 
                 tx.commit();
             } catch (Exception e) {
-                if (tx != null && account == null) {
-                    System.out.println("rolling back deposit");
-                    tx.rollback();
-                    Throwable throwable = new Throwable();
-                    throw new DepositTransactionException("deposit failed", throwable);
-                }
+                if (tx != null) tx.rollback();
+                throw new DepositTransactionException("deposit failed", e);
             } finally {
                 session.close();
             }
+
+
+
+
+//            catch (Exception e) {
+//                if (tx != null && account == null) {
+//                    System.out.println("rolling back deposit");
+//                    tx.rollback();
+//                    Throwable throwable = new Throwable();
+//                    throw new DepositTransactionException("deposit failed", throwable);
+//                }
+//            } finally {
+//                session.close();
+//            }
         } else {
+            tx.rollback();
             Throwable throwable = new Throwable();
             throw  new DepositTransactionException("Account does not exist", throwable);
         }
@@ -109,17 +125,17 @@ public void updateAccount (Account account) { accountRepository.save(account);}
     }
 
 
-    public void withdrawAccount (String accountNumber, Double withdrawMoney, String transferAccountNumber) throws WithdrawalTransactionException {
+    private void withdrawAccount (String accountNumber, Double withdrawMoney, String transferAccountNumber) throws WithdrawalTransactionException {
 
         Account account = accountRepository.findAccountByAccountNumber(accountNumber);
         Account transferAccount = accountRepository.findAccountByAccountNumber(transferAccountNumber);
 
-        Session session = getSession();
+        Session session = sessionProvider.getSession();
         Transaction tx = session.beginTransaction();
 
         try { account.setBalance(account.getBalance() - withdrawMoney);
 
-            Transfer transfer = transferAndTransferDateService.
+            Transfer transfer =
                     createAndSaveNewTransfer(accountNumber, transferAccountNumber, "-"+ withdrawMoney,
                             account, transferAccount, "Withdraw Money");
            updateTransferListForAccount(account, transfer);
@@ -127,10 +143,10 @@ public void updateAccount (Account account) { accountRepository.save(account);}
             tx.commit();
         } catch (Exception e) {
             if (tx != null && account==null) {
-                System.out.println("rolling back deposit");
+                System.out.println("rolling back withdrawal");
                 tx.rollback();
                 Throwable throwable = new Throwable();
-                throw new DepositTransactionException("withdrawal failed",throwable);
+                throw new WithdrawalTransactionException("withdrawal failed",throwable);
             }
         } finally {
             session.close();
@@ -193,13 +209,6 @@ public void updateAccount (Account account) { accountRepository.save(account);}
 
 
 
-    private void updateTransferListForAccount (Account account, Transfer transfer) {
-        List<Transfer> transferList = account.getTransfers();
-        transferList.add(transfer);
-        account.setTransfers(transferList);
-        accountRepository.save(account);
-    }
-
 
     public Map<String, List<Transfer>> createMapOfDatesAndListsOfTransfers(String accountNumber) {
 
@@ -236,10 +245,58 @@ public void updateAccount (Account account) { accountRepository.save(account);}
         return null;
     }
 
-    private Session getSession () {
-        SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
-        return  sessionFactory.openSession();
+
+
+//    private Session getSession () {
+//        SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
+//        return  sessionFactory.openSession();
+//    }
+
+
+
+
+    private void updateTransferListForAccount (Account account, Transfer transfer) {
+        List<Transfer> transferList = account.getTransfers();
+        transferList.add(transfer);
+        account.setTransfers(transferList);
+        accountRepository.save(account);
     }
+
+
+
+//    private void updateTransferListToDate (Transfer transfer, TransferDate transferDateNew) {
+//        List<Transfer> newTransferList = new ArrayList<>();
+//        if (transferDateNew.getTransferListToDate() != null) {
+//            newTransferList = transferDateNew.getTransferListToDate();
+//        }
+//        newTransferList.add(transfer);
+//        transferDateNew.setTransferListToDate(newTransferList);
+//
+//    }
+
+    private Transfer createAndSaveNewTransfer (String accountNumber, String transferredAccountNumber, String transferredMoney,
+                                              Account account, Account transferAccount, String accountInfo ) {
+
+
+        TransferDate transferDateNew = new TransferDate(transferDate());
+
+        Transfer transfer = new Transfer(transferredAccountNumber,transferredMoney,transferDateNew, account);
+        transfer.setAccountInfo(transferAccount.getUser().getUsername());
+        transferDateRepository.save(transferDateNew);
+        transferRepository.save(transfer);
+
+        return transfer;
+    }
+
+    private String transferDate () {
+        LocalDate localDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MMMM");
+        return localDate.format(formatter);
+
+    }
+
+   // private List<TransferDate> getAllTransferDates () {return transferDateRepository.findAll();}
+
 
 }
 
