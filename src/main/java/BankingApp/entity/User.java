@@ -18,7 +18,6 @@ public class User {
     private String username;
     @NotBlank(message = "Passwort darf nicht leer sein")
     @Size(min = 5)
-    @Size(max = 25)
     private String password;
 
     public String getPassword() {
