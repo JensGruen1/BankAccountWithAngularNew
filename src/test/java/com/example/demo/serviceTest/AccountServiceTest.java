@@ -24,10 +24,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class AccountServiceTest {
@@ -191,6 +191,42 @@ void transferAccount_shouldThrowWithdrawalException_whenSourceAccountIsNull () {
         verify(session).close();
 
     }
+@Test
+void transferAccount_shouldThrowDepositOrWithdrawalTransactionException_whenThereIsAnExceptionInCommit () {
+
+    User userSource = new User();
+    userSource.setUsername("userSource");
+    User userTarget = new User();
+    userTarget.setUsername("userTarget");
+
+    Account source = new Account();
+    source.setAccountNumber(AccountNumberGenerator.generateAccountNumber());
+    source.setBalance(400.00);
+    source.setUser(userSource);
+    source.setTransfers(new ArrayList<>());
+
+    Account target = new Account();
+    target.setAccountNumber(AccountNumberGenerator.generateAccountNumber());
+    target.setBalance(100.00);
+    target.setUser(userTarget);
+    target.setTransfers(new ArrayList<>());
+
+    when(accountRepository.findAccountByAccountNumber(source.getAccountNumber())).thenReturn(source);
+    when(accountRepository.findAccountByAccountNumber(target.getAccountNumber())).thenReturn(target);
+
+    doThrow(new RuntimeException("DB commit failed")).when(transaction).commit();
+
+    DepositTransactionException ex = assertThrows(DepositTransactionException.class, () ->
+            accountService.transferAccount(source.getAccountNumber(), 50.0, target.getAccountNumber())
+    );
+
+    assertEquals("deposit failed", ex.getMessage());
+    assertInstanceOf(RuntimeException.class, ex.getCause());
+    verify(transaction).rollback();
+
+
+
+}
 
 
 
@@ -251,11 +287,100 @@ void saveAccountToDatabase_shouldSaveAccountToDb () {
     }
 
 
+@Test
+void createMapOfDatesAndListsOfTransfers_shouldReturnNull_whenThereAreNoTransfers () {
+    //givwn
+    User userSource = new User();
+    userSource.setUsername("userSource");
+
+    Account source = new Account();
+    source.setAccountNumber(AccountNumberGenerator.generateAccountNumber());
+    source.setBalance(400.00);
+    source.setUser(userSource);
+    source.setTransfers(null);
 
 
-    public Account getAccountByAccountNumber (String accountNumber) {
-        return accountRepository.findAccountByAccountNumber(accountNumber);
-    }
+    //when then
+    assertNull(accountService.createMapOfDatesAndListsOfTransfers(source));
+}
+
+@Test
+void  createMapOfDatesAndListsOfTransfers_shouldCreateTwoEntriesWithTwoDifferentTransferDates () {
+    User userSource = new User();
+    userSource.setUsername("userSource");
+    User userTarget = new User();
+    userTarget.setUsername("userTarget");
+
+    Account source = new Account();
+    source.setAccountNumber(AccountNumberGenerator.generateAccountNumber());
+    source.setBalance(400.00);
+    source.setUser(userSource);
+
+    Account target = new Account();
+    target.setAccountNumber(AccountNumberGenerator.generateAccountNumber());
+    target.setBalance(100.00);
+    target.setUser(userTarget);
+
+    String date1 = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MMMM"));
+    String date2 = LocalDate.of(2025,8,20).format(DateTimeFormatter.ofPattern("dd.MMMM"));
+    TransferDate transferDate1 = new TransferDate(date1);
+    TransferDate transferDate2 = new TransferDate(date2);
+
+
+
+    Transfer transfer1 = new Transfer(source.getAccountNumber(),"50.00",transferDate1, target);
+    Transfer transfer2 = new Transfer(source.getAccountNumber(),"20.00",transferDate2, target);
+    List<Transfer>  transferList = new ArrayList<>();
+    transferList.add(transfer1);
+    transferList.add(transfer2);
+    source.setTransfers(transferList);
+
+    //assertNotNull(source.getTransfers());
+
+    Map<String, List<Transfer>> result = accountService.createMapOfDatesAndListsOfTransfers(source);
+
+    assertEquals(2,result.size());
+    assertEquals(transfer1, result.get(date1).getFirst());
+    assertEquals(transfer2, result.get(date2).getFirst());
+
+}
+
+@Test
+void  createMapOfDatesAndListsOfTransfers_shouldCombineTwoTransfersWithSameDate ()  {
+    User userSource = new User();
+    userSource.setUsername("userSource");
+    User userTarget = new User();
+    userTarget.setUsername("userTarget");
+
+    Account source = new Account();
+    source.setAccountNumber(AccountNumberGenerator.generateAccountNumber());
+    source.setBalance(400.00);
+    source.setUser(userSource);
+
+    Account target = new Account();
+    target.setAccountNumber(AccountNumberGenerator.generateAccountNumber());
+    target.setBalance(100.00);
+    target.setUser(userTarget);
+
+    String date = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MMMM"));
+    TransferDate transferDate = new TransferDate(date);
+
+    Transfer transfer1 = new Transfer(source.getAccountNumber(),"50.00",transferDate, target);
+    Transfer transfer2 = new Transfer(source.getAccountNumber(),"20.00",transferDate, target);
+    List<Transfer>  transferList = new ArrayList<>();
+    transferList.add(transfer1);
+    transferList.add(transfer2);
+    source.setTransfers(transferList);
+
+    Map<String, List<Transfer>> result = accountService.createMapOfDatesAndListsOfTransfers(source);
+
+    assertEquals(1,result.size());
+    List<Transfer> listOfTransferForDate= result.get(date);
+    assertTrue(result.get(date).containsAll(List.of(transfer1,transfer2)));
+    ///assertEquals(List.of(transfer1,transfer2), result.get(date).subList(0,2));
+
+}
+
 
 
 

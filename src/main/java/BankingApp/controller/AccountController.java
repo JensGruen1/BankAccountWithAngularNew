@@ -91,9 +91,10 @@ public class AccountController {
         @GetMapping("/getDateTransferMap/{accountNumber}")
         public ResponseEntity<?> getDateTransferMap(@PathVariable String accountNumber) {
             Map<String,List<Transfer>> transfersForEachDate = null;
+            Account account = accountService.getAccountByAccountNumber(accountNumber);
 
-            if (accountService.getAccountByAccountNumber(accountNumber) != null) {
-                transfersForEachDate = accountService.createMapOfDatesAndListsOfTransfers(accountNumber);
+            if (account != null) {
+                transfersForEachDate = accountService.createMapOfDatesAndListsOfTransfers(account);
 
                 return ResponseEntity.ok(transfersForEachDate);
             } else  {

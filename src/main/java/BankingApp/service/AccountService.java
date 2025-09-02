@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -210,40 +211,18 @@ public void updateAccount (Account account) { accountRepository.save(account);}
 
 
 
-    public Map<String, List<Transfer>> createMapOfDatesAndListsOfTransfers(String accountNumber) {
+    public Map<String, List<Transfer>> createMapOfDatesAndListsOfTransfers(Account account) {
 
-        //get current Account, assuming Account does exist -> error handling later
-        Account account = accountRepository.findAccountByAccountNumber(accountNumber);
-        //get all Transfers from this account
         List<Transfer> transfersForThisAccount = account.getTransfers();
 
         if (transfersForThisAccount != null) {
-            //get all Dates in a set (no duplicates!)
-            Set<String> dates = new HashSet<>();
-            for (Transfer transfer : transfersForThisAccount) {
-                String transferDate = transfer.getTransferDate().getTransferDate();
-                dates.add(transferDate);
-            }
-
-            //Create map with a String date as key and a list<Transfer> as a value
-            Iterator<String> it = dates.iterator();
-            Map<String, List<Transfer>> mapWithTransferForEachDate = new HashMap<>();
-            while (it.hasNext()) {
-                String transferDate = it.next();
-                //Create a list of transfers for current date and current account
-                List<Transfer> transfersForEachDate = new ArrayList<>();
-                for (Transfer transfer : transfersForThisAccount) {
-                    if (Objects.equals(transfer.getTransferDate().getTransferDate(),
-                            transferDate)) {
-                        transfersForEachDate.add(transfer);
-                    }
-                }
-                mapWithTransferForEachDate.put(transferDate, transfersForEachDate);
-            }
-            return mapWithTransferForEachDate;
+            return transfersForThisAccount.stream()
+                    .collect(Collectors.groupingBy(t -> t.getTransferDate().getTransferDate()));
         }
         return null;
     }
+
+
 
 
 
