@@ -35,16 +35,12 @@ import java.util.Optional;
 public class UserController {
 
 
-    private final UserRepository repository;
-    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final SessionRegistry sessionRegistry;
     private final UserService userService;
 
-    public UserController(UserRepository repository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, SessionRegistry sessionRegistry, UserService userService) {
-        this.repository = repository;
-        this.passwordEncoder = passwordEncoder;
+    public UserController(AuthenticationManager authenticationManager, SessionRegistry sessionRegistry, UserService userService) {;
         this.authenticationManager = authenticationManager;
         this.sessionRegistry = sessionRegistry;
         this.userService = userService;
