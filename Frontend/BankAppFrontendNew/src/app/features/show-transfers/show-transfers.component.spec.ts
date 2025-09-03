@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ShowTransfersComponent } from './show-transfers.component';
 
 describe('ShowTransfersComponent', () => {
@@ -8,7 +9,11 @@ describe('ShowTransfersComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ShowTransfersComponent]
+      imports: [ShowTransfersComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
 
@@ -20,4 +25,15 @@ describe('ShowTransfersComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should load userName on ngOnInit', () => {
+    localStorage.setItem('user', JSON.stringify('testUser'));
+    component.ngOnInit();
+    expect(component.userName).toBe('testUser');
+
+  });
+
+  
+
+
 });
