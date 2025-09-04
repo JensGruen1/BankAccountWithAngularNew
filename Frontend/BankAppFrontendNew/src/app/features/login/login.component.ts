@@ -28,7 +28,7 @@ export class LoginComponent {
  logoutSuccess = false;
  timeoutLogout = false;
 
-  private route = inject(ActivatedRoute);
+private route = inject(ActivatedRoute);
 
 
 constructor(private http: HttpClient, private router: Router) {
@@ -50,6 +50,7 @@ constructor(private http: HttpClient, private router: Router) {
       next: (response) => {
         this.successMessage = response;
         localStorage.setItem('user', JSON.stringify(this.user.username));
+        this.clearMessagesAfterDelay();
         setTimeout(() => {
           this.router.navigate(['/home']);
         }, 1000);
@@ -64,12 +65,13 @@ constructor(private http: HttpClient, private router: Router) {
           this.errorMessage = '❌ Ungültige Anmeldedaten';
         } else {
           // Alle anderen HTTP-Fehler
-          this.errorMessage = `❌ Fehler vom Server (${error.status}): ${error.statusText || 'Unbekannt'}`;
+          this.errorMessage = `❌ Fehler vom Server (${error.status}): ${error.statusText || 'Unknown Error'}`;
         }
         this.clearMessagesAfterDelay();
       },
     });
   }
+
 
 
   private clearMessagesAfterDelay(): void {
