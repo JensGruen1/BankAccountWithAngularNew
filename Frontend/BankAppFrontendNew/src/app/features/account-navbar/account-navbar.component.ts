@@ -36,8 +36,9 @@ constructor(private http: HttpClient, private router: Router, private authServic
   }
 
 
+  //with jwt removed: withCredentials
 ngOnInit (): void {
-  this.http.get<string[]>('http://localhost:8080/api/users/listOfAccountNumbers',{ withCredentials: true }).subscribe({
+  this.http.get<string[]>('http://localhost:8080/api/users/listOfAccountNumbers').subscribe({
     next: (data) => {
       this.listOfAccountNumbers = data;
     }

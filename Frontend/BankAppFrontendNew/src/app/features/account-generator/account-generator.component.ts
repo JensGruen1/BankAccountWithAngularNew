@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient} from '@angular/common/http';
 import {Router} from '@angular/router';
+import { AccountService } from '../../sharedAccountService';
 
 @Component({
   selector: 'app-account-generator',
@@ -27,26 +28,47 @@ export class AccountGeneratorComponent {
  errorMessage ='';
  successMessage = '';
 
- constructor(private http: HttpClient, private router: Router) {}
+ constructor(private http: HttpClient, private router: Router, private accountService: AccountService,) {}
 
-  onSubmit() {
-    this.http.post('http://localhost:8080/api/users/account/createAccount', this.account, { withCredentials: true, responseType: 'text' }).subscribe({
+
+  //for jwt removed: withCredentials
+  // onSubmit() {
+  //   this.http.post('http://localhost:8080/api/users/account/createAccount', this.account, {responseType: 'text' }).subscribe({
+  //     next: (response) => {
+  //       this.successMessage = response;
+
+  //        localStorage.setItem('accountData', JSON.stringify({
+  //         accountType: this.account.accountType,
+  //         balance: this.account.balance,
+  //         accountId: this.account.accountId,
+  //       }));  
+
+  //       setTimeout(() => {
+  //         this.router.navigate(['/home']);
+  //       }, 1000);
+  
+  //    },
+  //   });
+  // }
+
+
+
+onSubmit() {
+    const accountToSubmit = {
+    accountType: this.account.accountType,
+    //accountId: this.account.accountId,
+    balance: this.account.balance
+  };
+  this.http.post('http://localhost:8080/api/users/account/createAccount', accountToSubmit, { responseType: 'text' })
+    .subscribe({
       next: (response) => {
-        this.successMessage = response;
-
-         localStorage.setItem('accountData', JSON.stringify({
-          accountType: this.account.accountType,
-          balance: this.account.balance,
-          accountId: this.account.accountId,
-        }));  
-
-        setTimeout(() => {
+        this.accountService.setAccountData(this.account); // speichert temporär im Service
+           setTimeout(() => {
           this.router.navigate(['/home']);
         }, 1000);
-  
-     },
+      }
     });
-  }
+}
 
 
   private clearMessagesAfterDelay(): void {

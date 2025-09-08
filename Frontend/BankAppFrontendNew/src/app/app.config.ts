@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, Component, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, Routes } from '@angular/router';
 import { SignupComponent } from './features/signup/signup.component';
@@ -9,6 +9,7 @@ import { AccountGeneratorComponent } from './features/account-generator/account-
 import { DepositComponent } from './features/deposit/deposit.component';
 import { WithdrawComponent } from './features/withdraw/withdraw.component';
 import { TransferComponent } from './features/transfer/transfer.component';
+import { jwtInterceptor } from './jwt.interceptor';
 
 // import { routes } from './app.routes';
 
@@ -29,9 +30,11 @@ const routes: Routes = [
 ];
 
 
-export const appConfig: ApplicationConfig = {
+
+
+export const appConfig = {
   providers: [
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([jwtInterceptor])),
     provideRouter(routes)
   ]
 };

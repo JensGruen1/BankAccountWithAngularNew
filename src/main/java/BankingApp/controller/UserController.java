@@ -1,6 +1,8 @@
 package BankingApp.controller;
 
 
+import BankingApp.config.JwtUtil;
+import BankingApp.dto.JwtResponse;
 import BankingApp.dto.LoginRequest;
 import BankingApp.entity.User;
 import BankingApp.repository.UserRepository;
@@ -22,6 +24,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.validation.BindingResult;
@@ -39,8 +42,11 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final SessionRegistry sessionRegistry;
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-    public UserController(AuthenticationManager authenticationManager, SessionRegistry sessionRegistry, UserService userService) {;
+    public UserController(AuthenticationManager authenticationManager, SessionRegistry sessionRegistry, UserService userService, JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+        ;
         this.authenticationManager = authenticationManager;
         this.sessionRegistry = sessionRegistry;
         this.userService = userService;
@@ -70,6 +76,31 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
     }*/
 
+    //standart with sessions:
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(HttpServletRequest request, @RequestBody LoginRequest loginrequest) {
+//        try {
+//            logger.info("Login attempt for user: {}", loginrequest.getUsername());
+//            Authentication authentication = authenticationManager.authenticate(
+//                    new UsernamePasswordAuthenticationToken(loginrequest.getUsername(), loginrequest.getPassword())
+//            );
+//
+//            // Login erfolgreich
+//            logger.info("Login successful for user: {}", loginrequest.getUsername());
+//
+//            SecurityContextHolder.getContext().setAuthentication(authentication);
+//            HttpSession session = request.getSession(true);
+//            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+//                    SecurityContextHolder.getContext());
+//            sessionRegistry.registerNewSession(session.getId(), authentication.getPrincipal());
+//            return ResponseEntity.ok("Login erfolgreich");
+//        } catch (BadCredentialsException ex) {
+//            logger.warn("Login failed for user: {} - Reason: {}", loginrequest.getUsername(), ex.getMessage());
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Ungültige Zugangsdaten");
+//        }
+//    }
+
+     //mit jwt:
     @PostMapping("/login")
     public ResponseEntity<?> login(HttpServletRequest request, @RequestBody LoginRequest loginrequest) {
         try {
@@ -81,12 +112,10 @@ public class UserController {
             // Login erfolgreich
             logger.info("Login successful for user: {}", loginrequest.getUsername());
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            HttpSession session = request.getSession(true);
-            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                    SecurityContextHolder.getContext());
-            sessionRegistry.registerNewSession(session.getId(), authentication.getPrincipal());
-            return ResponseEntity.ok("Login erfolgreich");
+            String token = jwtUtil.generateToken((UserDetails) authentication.getPrincipal());
+
+
+            return ResponseEntity.ok(new JwtResponse(token));
         } catch (BadCredentialsException ex) {
             logger.warn("Login failed for user: {} - Reason: {}", loginrequest.getUsername(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Ungültige Zugangsdaten");

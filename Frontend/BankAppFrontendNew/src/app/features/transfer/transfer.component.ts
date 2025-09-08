@@ -38,7 +38,7 @@ export class TransferComponent implements OnInit{
     constructor(private http:HttpClient, private router:Router, private authService: AuthService) {}
 
     ngOnInit():void {
-    this.http.get<Account[]>('http://localhost:8080/api/users/showAccounts',{withCredentials: true}).subscribe({
+    this.http.get<Account[]>('http://localhost:8080/api/users/showAccounts').subscribe({
       next: (data) => {
       this.accounts = data;
     }
@@ -64,13 +64,13 @@ export class TransferComponent implements OnInit{
   transferredMoney: this.transferredMoney,
   accountNumberReceiver: this.accountNumberReceiver  
 };
-console.log(transfer);
 
-    this.http.post('http://localhost:8080/api/users/transfer',transfer, {withCredentials: true, responseType: 'text'}).subscribe({
+
+    this.http.post('http://localhost:8080/api/users/transfer',transfer, {responseType: 'text'}).subscribe({
         next: (response) => {
-          console.log('Transfer erfolgreich:', response);
-          console.log('transferedMoney:', this.transferredMoney, typeof this.transferredMoney);
-                  setTimeout(() => {
+
+          localStorage.removeItem('activeAccount');
+          setTimeout(() => {
           this.router.navigate(['/home']);
         }, 1000);
       },

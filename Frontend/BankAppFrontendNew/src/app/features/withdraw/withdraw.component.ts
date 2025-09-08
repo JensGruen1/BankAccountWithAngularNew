@@ -39,7 +39,7 @@ export class WithdrawComponent implements OnInit {
 
   ngOnInit():void {
     //this.authService.checkUser();
-    this.http.get<Account[]>('http://localhost:8080/api/users/showAccounts',{withCredentials: true}).subscribe({
+    this.http.get<Account[]>('http://localhost:8080/api/users/showAccounts').subscribe({
    next: (data) => {
       this.accounts = data;
     }
@@ -64,10 +64,11 @@ export class WithdrawComponent implements OnInit {
   amount: this.withdrawAmount   
 };
 
-    this.http.post('http://localhost:8080/api/users/withdraw',withdraw, {withCredentials: true, responseType: 'text'}).subscribe({
+    this.http.post('http://localhost:8080/api/users/withdraw',withdraw, {responseType: 'text'}).subscribe({
         next: (response) => {
-          console.log('Withdraw erfolgreich:', response);
-                  setTimeout(() => {
+          localStorage.removeItem('deposit');
+          localStorage.removeItem('activeAccount');
+          setTimeout(() => {
           this.router.navigate(['/home']);
         }, 1000);
       },

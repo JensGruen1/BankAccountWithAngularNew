@@ -7,6 +7,11 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 
+interface LoginResponse {
+  token: string;
+}
+
+
 @Component({
   selector: 'app-login',
   standalone: true, 
@@ -44,13 +49,46 @@ constructor(private http: HttpClient, private router: Router) {
       });
 }
 
+  ngOnInit() {
+    localStorage.clear();
+  }
 
-  onSubmit() {
-    this.http.post('http://localhost:8080/api/users/login', this.user, { withCredentials: true, responseType: 'text' }).subscribe({
+//without jwt:
+  // onSubmit() {
+  //   this.http.post('http://localhost:8080/api/users/login', this.user, { withCredentials: true, responseType: 'text' }).subscribe({
+  //     next: (response) => {
+  //       this.successMessage = response;
+  //       localStorage.setItem('user', JSON.stringify(this.user.username));
+  //       this.clearMessagesAfterDelay();
+  //       setTimeout(() => {
+  //         this.router.navigate(['/home']);
+  //       }, 1000);
+  
+  //     },
+  //     error: (error) => {
+  //       if (error.status === 0) {
+  //         // Status 0 = kein Kontakt zum Backend
+  //         this.errorMessage = '❌ Keine Verbindung zum Server';
+  //       } else if (error.status === 401) {
+  //         // Status 401 = Login falsch
+  //         this.errorMessage = '❌ Ungültige Anmeldedaten';
+  //       } else {
+  //         // Alle anderen HTTP-Fehler
+  //         this.errorMessage = `❌ Fehler vom Server (${error.status}): ${error.statusText || 'Unknown Error'}`;
+  //       }
+  //       this.clearMessagesAfterDelay();
+  //     },
+  //   });
+  // }
+
+
+    // with jwt
+    onSubmit() {
+    this.http.post<LoginResponse>('http://localhost:8080/api/users/login', this.user).subscribe({
       next: (response) => {
-        this.successMessage = response;
-        localStorage.setItem('user', JSON.stringify(this.user.username));
-        this.clearMessagesAfterDelay();
+        localStorage.setItem('jwt_token', response.token);
+          this.successMessage = '✅ Login erfolgreich';
+          this.clearMessagesAfterDelay();;
         setTimeout(() => {
           this.router.navigate(['/home']);
         }, 1000);
@@ -70,6 +108,14 @@ constructor(private http: HttpClient, private router: Router) {
         this.clearMessagesAfterDelay();
       },
     });
+  }
+
+
+
+//only for jwt needed:
+    logout() {
+    localStorage.removeItem('jwt_token');
+    this.router.navigate(['/login'], { queryParams: { logout: 'true' } });
   }
 
 
