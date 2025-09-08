@@ -28,6 +28,11 @@ export class SignupComponent {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+
+  ngOnInit() {
+    localStorage.clear();
+  }
+
   onSubmit() {
     this.http.post('http://localhost:8080/api/users/signup', this.user, { responseType: 'text' }).subscribe({
       next: (response) => {

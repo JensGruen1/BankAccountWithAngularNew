@@ -119,11 +119,13 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -132,6 +134,87 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 
 import java.util.List;
 
+
+//normal security config without jwt token:
+//@Configuration
+//public class SecurityConfig {
+//
+//    private final UserDetailsService userDetailsService;
+//    private final PasswordEncoder passwordEncoder;
+//
+//    public SecurityConfig(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+//        this.userDetailsService = userDetailsService;
+//        this.passwordEncoder = passwordEncoder;
+//    }
+//
+//    @Bean
+//    public DaoAuthenticationProvider authenticationProvider() {
+//        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+//        provider.setUserDetailsService(userDetailsService);
+//        provider.setPasswordEncoder(passwordEncoder);
+//        return provider;
+//    }
+//
+//    @Bean
+//    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+//        return http.getSharedObject(AuthenticationManagerBuilder.class)
+//                .authenticationProvider(authenticationProvider())
+//                .build();
+//    }
+//
+//    @Bean
+//    public SessionRegistry sessionRegistry() {
+//        return new SessionRegistryImpl();
+//    }
+//
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+//                .csrf(csrf -> csrf.disable())
+//                .sessionManagement(session -> session
+//                        .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
+//                        .maximumSessions(-1) // unbegrenzte Sessions pro Benutzer
+//                        .sessionRegistry(sessionRegistry()) // registriere Sessions in der Registry
+//                )
+//
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/api/users/signup", "/api/users/login", "/api/users/logout").permitAll()
+//                        .requestMatchers("/api/**").authenticated()
+//                )
+//                .logout(logout -> logout
+//                        .logoutUrl("/api/users/logout")
+//                        .invalidateHttpSession(true)
+//                        .logoutSuccessHandler((request, response, authentication) -> response.setStatus(200))
+//                        .deleteCookies("JSESSIONID")
+//                ).httpBasic(Customizer.withDefaults());
+//
+//        return http.build();
+//    }
+//
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration config = new CorsConfiguration();
+//        config.setAllowedOrigins(List.of("http://localhost:4200"));
+//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//        config.setAllowedHeaders(List.of("*"));
+//        config.setAllowCredentials(true);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", config);
+//        return source;
+//    }
+//
+//
+//
+//    @Bean
+//    public HttpSessionEventPublisher httpSessionEventPublisher() {
+//        return new HttpSessionEventPublisher();
+//    }
+//}
+
+
+//security config mit jwt token
 @Configuration
 public class SecurityConfig {
 
@@ -164,26 +247,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
-                        .maximumSessions(-1) // unbegrenzte Sessions pro Benutzer
-                        .sessionRegistry(sessionRegistry()) // registriere Sessions in der Registry
-                )
-
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/signup", "/api/users/login", "/api/users/logout").permitAll()
                         .requestMatchers("/api/**").authenticated()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/api/users/logout")
-                        .invalidateHttpSession(true)
-                        .logoutSuccessHandler((request, response, authentication) -> response.setStatus(200))
-                        .deleteCookies("JSESSIONID")
-                ).httpBasic(Customizer.withDefaults());
+                ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

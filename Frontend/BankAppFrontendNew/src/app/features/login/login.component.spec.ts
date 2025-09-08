@@ -48,7 +48,7 @@ describe('LoginComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('on successful login it should create success message,save User to localstorage and direct to home page',fakeAsync(() => {
+  it('on successful login it should create success message,save Jwt to localstorage and direct to home page',fakeAsync(() => {
     component.user = {username: 'testUser', password: 'password'};
     const mockResponse = 'Login successful';
 
@@ -56,12 +56,22 @@ describe('LoginComponent', () => {
 
     const request = httpMock.expectOne('http://localhost:8080/api/users/login');
     expect(request.request.method).toBe('POST')
-    expect(request.request.withCredentials).toBeTrue();
-    request.flush(mockResponse);
+    //expect(request.request.withCredentials).toBeTrue();
 
-    expect(localStorage.getItem('user')).toBe(JSON.stringify('testUser'));
-    expect(component.successMessage).toBe('Login successful');
+
+       // JWT simulieren
+    request.flush({ token: 'fake-jwt-token' });
+
+    expect(localStorage.getItem('jwt_token')).toBe('fake-jwt-token');
+    expect(component.successMessage).toBe('✅ Login erfolgreich');
     expect(component.errorMessage).toBe('');
+
+
+    // request.flush(mockResponse);
+
+    // expect(localStorage.getItem('user')).toBe(JSON.stringify('testUser'));
+    // expect(component.successMessage).toBe('Login successful');
+    // expect(component.errorMessage).toBe('');
     //expect(component.user).toEqual({username:'', password:''});
 
     tick(1000);
@@ -100,7 +110,7 @@ describe('LoginComponent', () => {
 
     const request = httpMock.expectOne('http://localhost:8080/api/users/login');
     expect(request.request.method).toBe('POST')
-    expect(request.request.withCredentials).toBeTrue();
+    //expect(request.request.withCredentials).toBeTrue();
     request.flush('Invalid input', {status: 401, statusText: 'Invalid input'});
 
     expect(component.errorMessage).toBe('❌ Ungültige Anmeldedaten');
@@ -118,7 +128,7 @@ describe('LoginComponent', () => {
 
     const request = httpMock.expectOne('http://localhost:8080/api/users/login');
     expect(request.request.method).toBe('POST');
-    expect(request.request.withCredentials).toBeTrue();
+    //expect(request.request.withCredentials).toBeTrue();
     request.error(new ProgressEvent('error'), { status: 0});
 
     expect(component.errorMessage).toBe('❌ Keine Verbindung zum Server');
@@ -137,7 +147,7 @@ describe('LoginComponent', () => {
 
     const request = httpMock.expectOne('http://localhost:8080/api/users/login');
     expect(request.request.method).toBe('POST');
-    expect(request.request.withCredentials).toBeTrue();
+    //expect(request.request.withCredentials).toBeTrue();
     request.flush('Server error', {status: 500,statusText:'Internal server error'});
 
     expect(component.errorMessage).toBe('❌ Fehler vom Server (500): Internal server error');

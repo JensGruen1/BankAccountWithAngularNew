@@ -50,8 +50,9 @@ constructor(private http:HttpClient, private router:Router) {}
 
 
 //maybe only the accountNumbers
+// for jwt withCredentials ist removed!
 ngOnInit (): void {
-  this.http.get<{ accountNumber: number; accountType: string; balance: number }[]>('http://localhost:8080/api/users/showAccounts',{ withCredentials: true }).subscribe({
+  this.http.get<{ accountNumber: number; accountType: string; balance: number }[]>('http://localhost:8080/api/users/showAccounts').subscribe({
     next: (data) => {
       console.log('Accounts vom Backend:', data);
       this.accounts = data;
@@ -98,17 +99,25 @@ onSubmit () {
 
   localStorage.setItem('deposit', JSON.stringify(deposit));
 
-
-  this.http.post('http://localhost:8080/api/users/deposit',deposit, { withCredentials: true, responseType: 'text'}).subscribe({
+//for jwt withCredentials is removed!
+  this.http.post('http://localhost:8080/api/users/deposit',deposit, {responseType: 'text'}).subscribe({
         next: (response) => {
-          console.log('Deposit erfolgreich:', response);
+          localStorage.removeItem('deposit');
+          localStorage.removeItem('activeAccount');
           setTimeout(() => {
           this.router.navigate(['/home']);
         }, 1000);
 
         },
         
-        error: (err) => console.error('Fehler beim Deposit:', err)
+          error: (err) => {
+        if (err.status === 401) {
+          // JWT ungültig/abgelaufen → Login
+          this.router.navigate(['/login']);
+        } else {
+          console.error('Fehler beim Deposit:', err);
+        }
+      }
 
   });
 }
