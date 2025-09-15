@@ -2,7 +2,7 @@
 <router-outlet (activate)="onActivate($event)"></router-outlet>
 <ng-container *ngIf="showNavbar">
 <app-navbar></app-navbar>
-<app-account-navbar  (accountChanged)="onAccountChanged($event)"></app-account-navbar>
+<app-account-navbar  (outputAccountNumber)="onAccountChanged($event)"></app-account-navbar>
 <app-show-transfers [accountNumber]="selectedAccountNumber"></app-show-transfers>
 </ng-container>
 

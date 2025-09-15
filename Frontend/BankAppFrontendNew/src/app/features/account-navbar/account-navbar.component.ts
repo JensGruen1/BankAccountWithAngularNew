@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http'; 
-import { AuthService } from '../../auth.service';
 
 interface Account {
   accountNumber: string;
@@ -23,20 +22,19 @@ interface Account {
 export class AccountNavbarComponent implements OnInit{
 
 
-@Output() accountChanged = new EventEmitter<string>();
-//accounts: Account[] = [];
-//selectedAccount: Account | null = null;
+@Output() outputAccountNumber = new EventEmitter<string>();
 listOfAccountNumbers: string[] = [];
+accountNumber: string ='';
 
-constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
-
- onAccountChange(event: Event) {
-    const value = (event.target as HTMLSelectElement).value;
-    this.accountChanged.emit(value);
-  }
+constructor(private http: HttpClient, private router: Router) {}
 
 
-  //with jwt removed: withCredentials
+   onAccountChange(accountNumber: string) {
+     this.outputAccountNumber.emit(accountNumber);
+   }
+
+
+
 ngOnInit (): void {
   this.http.get<string[]>('http://localhost:8080/api/users/listOfAccountNumbers').subscribe({
     next: (data) => {
@@ -45,9 +43,6 @@ ngOnInit (): void {
   });
 }
 
-//  setAccountToLocalStorage(accountNumber: string):void {
-//  localStorage.setItem('activeAccount', JSON.stringify(accountNumber));
-//}
 
 
 }

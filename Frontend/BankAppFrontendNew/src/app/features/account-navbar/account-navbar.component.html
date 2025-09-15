@@ -17,10 +17,9 @@
 
          <li class="dropdown"> 
           <div class="dropdown">
-            <!-- <select id="accountNumber" name="accountNumber" class="form-select" required [(ngModel)]="selectedAccount" (ngModelChange)="setAccountToLocalStorage($event)"> -->
-              <select id="accountNumber" name="accountNumber" class="form-select" required (change)="onAccountChange($event)">
+              <select id="accountNumber" name="accountNumber" class="form-select" required [(ngModel)]="accountNumber" (ngModelChange)="onAccountChange($event)">
               <option [ngValue]="null" disabled selected> Select your Bank Account</option>
-              <option *ngFor="let account of listOfAccountNumbers" [ngValue]="account">{{ account }}
+              <option *ngFor="let accountNumber of listOfAccountNumbers" >{{ accountNumber }}
             </select>
             </div>
           </li> 

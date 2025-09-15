@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { HttpClient} from '@angular/common/http';
-import {Router} from '@angular/router';
+import { Router} from '@angular/router';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -32,20 +32,34 @@ export class LoginComponent {
  successMessage = '';
  logoutSuccess = false;
  timeoutLogout = false;
+// serverError: boolean = false;
 
+
+ //new inject() method from Angular 19+ does DI without constructor.
 private route = inject(ActivatedRoute);
 
 
+
+//Logout in Constructor because it is called before anything else, even before ngOnInit. 
+//It is recommended to call it in ngOnInit
+//Constructor should only be for DI
 constructor(private http: HttpClient, private router: Router) {
     this.route.queryParamMap
       .pipe(takeUntilDestroyed())
-      .subscribe((params: ParamMap) => {      
-          if (params.has('logout')) {
-          this.logoutSuccess = true;
-          setTimeout(() => this.logoutSuccess = false, 3000);
+      .subscribe((params: ParamMap) => {   
+        if (params.has('logout')) {
+          this.logout();  
+        } else if (params.has('serverError')) {
+         localStorage.removeItem('jwt_token');
+          this.errorMessage = '❌ Internal Server Error, fallback to login';
+        } else if (params.has('jwtTokenError')) {
+          localStorage.removeItem('jwt_token');
+          this.errorMessage = '❌ jwt Token expired';
         } else {
           this.logoutSuccess = false;
         }
+
+        this.clearMessagesAfterDelay();
       });
 }
 
@@ -112,10 +126,12 @@ constructor(private http: HttpClient, private router: Router) {
 
 
 
-//only for jwt needed:
     logout() {
-    localStorage.removeItem('jwt_token');
-    this.router.navigate(['/login'], { queryParams: { logout: 'true' } });
+  //localStorage.removeItem('jwt_token');
+    //this.router.navigate(['/login'], { queryParams: { logout: 'true' } });
+          this.logoutSuccess = true;
+          localStorage.removeItem('jwt_token');
+          setTimeout(() => this.logoutSuccess = false, 3000);
   }
 
 

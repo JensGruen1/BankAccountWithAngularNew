@@ -6,7 +6,7 @@
 
       <div class="mb-3">
         <label for="accountNumber" class="form-label">Select your Bank account</label>
-        <select id="accountNumber" name="accountNumber" class="form-select" required [(ngModel)]="selectedAccount" (ngModelChange)="setAccountToLocalStorage($event)">
+          <select id="accountNumber" name="accountNumber" class="form-select" required [(ngModel)]="account" (ngModelChange)="setAccountData($event)">
           <!-- <select id="accountNumber" name="accountNumber" class="form-select" required (change)="onAccountSelect($event)"></select> -->
            <option *ngFor="let account of accounts" [ngValue]="account">{{ account.accountNumber }}
         </select>

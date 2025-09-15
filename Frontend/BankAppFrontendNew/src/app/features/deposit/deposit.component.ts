@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http'; 
+import { BehaviorSubject } from 'rxjs';
 
 interface Account {
   accountNumber: string;
@@ -31,91 +32,56 @@ export class DepositComponent {
 
 
 //Account to submit
-account = {
-  accountNumber: '',
-  balance: '',
-  accountType: '',
-};
-
+account:Account = {accountNumber:'', accountType: '', balance: 0};
 
 //List of Accounts
-//accounts: typeof this.account[] = [];
-accounts: { accountNumber: number; accountType: string; balance: number }[] = []; 
+accounts: Account[] = []; 
 
-selectedAccount: Account | null = null;
 depositAmount: number = 0;
+private accountData$ = new BehaviorSubject<any>(null);
 
 
 constructor(private http:HttpClient, private router:Router) {}
 
 
-//maybe only the accountNumbers
 // for jwt withCredentials ist removed!
 ngOnInit (): void {
-  this.http.get<{ accountNumber: number; accountType: string; balance: number }[]>('http://localhost:8080/api/users/showAccounts').subscribe({
+  this.http.get<Account[]>('http://localhost:8080/api/users/showAccounts').subscribe({
     next: (data) => {
-      console.log('Accounts vom Backend:', data);
       this.accounts = data;
     }
+    //error handling still missing
   });
 }
 
-/* onAccountSelect (event:Event): void {
-  const selectedAccount = (event.target as HTMLSelectElement).value;
-  localStorage.setItem('activeAccount', selectedAccount);
-  console.log('Gespeicherter Account:', selectedAccount);
-} */
 
-setAccountToLocalStorage(account: Account):void {
-  localStorage.setItem('activeAccount', JSON.stringify(account));
+setAccountData(account: Account) {
+    this.accountData$.next(account);
+  }
+
+getAccountData() {
+   return this.accountData$.getValue();
 }
 
 
-
-
 onSubmit () {
-  const raw = localStorage.getItem('activeAccount');
-   if (!raw) {
-    console.error('Kein aktiver Account gefunden!');
-    return;
-  }
 
-  const activeAccount: Account = JSON.parse(raw);
-
-  const newBalance = activeAccount.balance + this.depositAmount;
-
-  const updatedAccount: Account = {
-      accountNumber: activeAccount.accountNumber,
-      accountType: activeAccount.accountType,
-      balance: newBalance
-  };
-
-  const deposit = {
-  accountNumber: activeAccount.accountNumber,
-  amount: this.depositAmount   // 👈 gleiches Feld wie im Backend
+const deposit = {
+  accountNumber: this.getAccountData().accountNumber,
+  amount:  this.depositAmount
 };
 
-
-
-  localStorage.setItem('deposit', JSON.stringify(deposit));
-
-//for jwt withCredentials is removed!
   this.http.post('http://localhost:8080/api/users/deposit',deposit, {responseType: 'text'}).subscribe({
-        next: (response) => {
-          localStorage.removeItem('deposit');
-          localStorage.removeItem('activeAccount');
+        next: () => {
           setTimeout(() => {
-          this.router.navigate(['/home']);
+          this.router.navigate(['/home'],{queryParams: {depositSuccess: true}});
         }, 1000);
-
         },
-        
           error: (err) => {
         if (err.status === 401) {
-          // JWT ungültig/abgelaufen → Login
-          this.router.navigate(['/login']);
+          this.router.navigate(['/login'], {queryParams: {jwtTokenError: true}});
         } else {
-          console.error('Fehler beim Deposit:', err);
+          this.router.navigate(['/login'], {queryParams: {serverError: true}});
         }
       }
 
