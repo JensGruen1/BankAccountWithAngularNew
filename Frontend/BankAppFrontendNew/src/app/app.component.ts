@@ -27,14 +27,13 @@ import { ShowTransfersComponent } from './features/show-transfers/show-transfers
 export class AppComponent {
     showNavbar = false;
     private inactivityService = inject(InactivityService);
-     private router = inject(Router);
+    private router = inject(Router);
     selectedAccountNumber!:string;
 
 
     // Wird aufgerufen, wenn eine Route geladen wird
   onActivate(component: any) {
     // Navbar nur anzeigen, wenn HomeScreenComponent aktiv ist
-    console.log('Activated component:', component.constructor.name);
     this.showNavbar = component instanceof HomeComponent;
   }
 

@@ -46,19 +46,11 @@ export class ShowTransfersComponent {
   };
 
   userName: string | null = null;
-
-ngOnInit() {
-  console.log("HomeComponent geladen!");
-  this.userName = this.getUsernameFromToken();
-  //without jwt
-//   const usernameJson = localStorage.getItem('user');
-//   if (usernameJson) {
-//     this.userName = JSON.parse(usernameJson);
-//   }
-}
-
-  //transfersByDate: DateTransferMap = {};
   transfersByDate: { [date: string]: Transfer[] } = {};
+
+  ngOnInit() {
+    this.userName = this.getUsernameFromToken();
+  }
 
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -70,19 +62,16 @@ ngOnInit() {
 
   constructor(private http:HttpClient) {}
 
-  //removed withCredentials for jwt token
+  
   onAccountChange(newAccountNumber: string) {
-    console.log('Neue Kontonummer:', newAccountNumber);
     this.http.get<Account>(`http://localhost:8080/api/users/getAccountDetails/${newAccountNumber}`).subscribe({
       next: (data) => {
       this.account = data;
-      console.log('Account:', this.account);
     }
     });
     this.http.get<DateTransferMap>(`http://localhost:8080/api/users/getDateTransferMap/${newAccountNumber}`).subscribe({
      next: (data) => {
      this.transfersByDate = data;
-      console.log('DateTransferMap:', this.transfersByDate);
     }
    });
  

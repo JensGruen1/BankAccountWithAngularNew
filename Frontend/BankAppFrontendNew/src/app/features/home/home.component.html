@@ -23,5 +23,14 @@
     </div>
   </div>
 </div> -->
+   
 
+    <div *ngIf="successMessage" class="alert alert-success" role="alert">
+        {{successMessage}}
+    </div>
+
+
+    <div *ngIf="accountCreationFailure" class="alert alert-danger" role="alert">
+        ❌ Account creation failed
+    </div>
 
